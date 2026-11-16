@@ -76,7 +76,6 @@ int main(int argc, char** argv) {
         .help("If set, the generated preset 'inherits' field will be set to this");
 
     // Target Mode
-    std::cout << "Constructing target command" << std::endl;
     argparse::ArgumentParser targetCommand("target");
     program.add_subparser(targetCommand);
 
