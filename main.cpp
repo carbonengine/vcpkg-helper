@@ -55,19 +55,19 @@ int main(int argc, char** argv) {
         .default_value(".")
         .help("Path to the root of the cmake project you want to generate a configuration for");
 
-    std::vector<std::string> local_dependencies;
-    generateCommand.add_argument("--local_dep", "-l")
-        .nargs(2)
-        .append()
-        .store_into(local_dependencies)
-        .help("Specify a local dependency '<DEPENDENCY NAME> <FILE PATH>'");
-
-    std::vector<std::string> git_dependencies;
-    generateCommand.add_argument("--git_dep", "-g")
-        .nargs(2)
-        .append()
-        .store_into(git_dependencies)
-        .help("Specify a dependency on github '<DEPENDENCY NAME> <GIT URL>'");
+    // std::vector<std::string> local_dependencies;
+    // generateCommand.add_argument("--local_dep", "-l")
+    //     .nargs(2)
+    //     .append()
+    //     .store_into(local_dependencies)
+    //     .help("Specify a local dependency '<DEPENDENCY NAME> <FILE PATH>'");
+    //
+    // std::vector<std::string> git_dependencies;
+    // generateCommand.add_argument("--git_dep", "-g")
+    //     .nargs(2)
+    //     .append()
+    //     .store_into(git_dependencies)
+    //     .help("Specify a dependency on github '<DEPENDENCY NAME> <GIT URL>'");
 
     std::string generatedPresetParentName;
     generateCommand.add_argument("-i")
