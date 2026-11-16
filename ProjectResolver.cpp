@@ -5,6 +5,7 @@
 #include "ProjectResolver.h"
 
 #include <iostream>
+#include <sstream>
 
 
 std::filesystem::path ProjectResolver::Resolve() {
