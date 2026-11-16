@@ -78,60 +78,77 @@ json MergeManifests(json user_manifest_blob, json target_manifest_blob, std::vec
     std::vector<Dependency> target_project_override_dependencies;
     std::set<std::string> shared_overrides;
 
-    if (user_manifest_blob.contains("overrides")) {
-        for (auto override : user_manifest_blob["overrides"]) {
-            std::string name = override["name"];
-            std::string version = override["version"];
-            user_project_overrides.insert(name);
-            Dependency d(name, version);
-            user_project_override_dependencies.push_back(d);
-        }
-    }
-
-    for (Dependency& override : exiting_overrides) {
-        matcher_project_overrides.insert(override.name);
-        target_project_override_dependencies.push_back(override);
-    }
-
-    if (target_manifest_blob.contains("overrides")) {
-        for (auto override : target_manifest_blob["overrides"]) {
-            std::string name = override["name"];
-            std::string version = override["version"];
-            if (!matcher_project_overrides.contains(name)) {
-                matcher_project_overrides.insert(name);
-                Dependency d(name, version);
-                target_project_override_dependencies.push_back(d);
-            }
-        }
-    }
-
-
-    std::ranges::set_intersection(
-        user_project_overrides, matcher_project_overrides,
-        std::inserter(shared_overrides, shared_overrides.begin())
-    );
-
-    // if the user and the build tree to match share override dependencies, use the version in the matching build tree
-    json output_overrides_json_list = json::array();
-    for (auto dep : user_project_override_dependencies) {
-        std::cout << "Target override preferred over user's for: " << dep.name << std::endl;
-        if (!shared_overrides.contains(dep.name)) {
-            output_overrides_json_list.push_back({
-                {"name", dep.name},
-                {"version", dep.version},
-            });
-        }
-    }
-
-    for (auto dep : target_project_override_dependencies) {
-        output_overrides_json_list.push_back({
-            {"name", dep.name},
-            {"version", dep.version},
-        });
-    }
+    // if (user_manifest_blob.contains("overrides")) {
+    //     for (auto override : user_manifest_blob["overrides"]) {
+    //         std::string name = override["name"];
+    //         std::string version = override["version"];
+    //         user_project_overrides.insert(name);
+    //         Dependency d(name, version);
+    //         user_project_override_dependencies.push_back(d);
+    //     }
+    // }
+    //
+    // for (Dependency& override : exiting_overrides) {
+    //     matcher_project_overrides.insert(override.name);
+    //     target_project_override_dependencies.push_back(override);
+    // }
+    //
+    // if (target_manifest_blob.contains("overrides")) {
+    //     for (auto override : target_manifest_blob["overrides"]) {
+    //         std::string name = override["name"];
+    //         std::string version = override["version"];
+    //         if (!matcher_project_overrides.contains(name)) {
+    //             matcher_project_overrides.insert(name);
+    //             Dependency d(name, version);
+    //             target_project_override_dependencies.push_back(d);
+    //         }
+    //     }
+    // }
+    //
+    //
+    // std::ranges::set_intersection(
+    //     user_project_overrides, matcher_project_overrides,
+    //     std::inserter(shared_overrides, shared_overrides.begin())
+    // );
+    //
+    // // if the user and the build tree to match share override dependencies, use the version in the matching build tree
+    // json output_overrides_json_list = json::array();
+    // for (auto dep : user_project_override_dependencies) {
+    //     std::cout << "Target override preferred over user's for: " << dep.name << std::endl;
+    //     if (!shared_overrides.contains(dep.name)) {
+    //         output_overrides_json_list.push_back({
+    //             {"name", dep.name},
+    //             {"version", dep.version},
+    //         });
+    //     }
+    // }
+    //
+    // for (auto dep : target_project_override_dependencies) {
+    //     output_overrides_json_list.push_back({
+    //         {"name", dep.name},
+    //         {"version", dep.version},
+    //     });
+    // }
+    //
 
     json output_manifest = user_manifest_blob;
-    output_manifest["overrides"] = output_overrides_json_list;
+
+    if (!exiting_overrides.empty()) {
+        auto overrides = json::array();
+        for (auto override : exiting_overrides) {
+            overrides.push_back({
+                {"name", override.name},
+                {"version", override.version},
+            });
+        }
+        output_manifest["overrides"] = overrides;
+    }
+    else {
+        if (target_manifest_blob.contains("overrides")) {
+            output_manifest["overrides"] = target_manifest_blob["overrides"];
+        }
+    }
+
     if (user_manifest_blob.contains("features")) {
         output_manifest["features"] = user_manifest_blob["features"];
     }
