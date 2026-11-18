@@ -10,20 +10,20 @@
 
 std::string normalize_git_repository_url(const std::string& url);
 
-json MergeConfigurations(json user_configuration_blob, json target_configuration_blob) {
+nlohmann::ordered_json MergeConfigurations(nlohmann::ordered_json user_configuration_blob, nlohmann::ordered_json target_configuration_blob) {
 
     // merge the configured registries lists between the locked project and the user's project
-    json user_configuration_registries_list = user_configuration_blob["registries"];
+    nlohmann::ordered_json user_configuration_registries_list = user_configuration_blob["registries"];
     std::map<std::string, std::string> normalized_url_to_registry_url;
     std::map<std::string, std::set<std::string> > normalized_registry_url_to_packages_set;
     std::map<std::string, std::string> normalized_registry_url_to_baseline;
 
-    for (json registry : target_configuration_blob["registries"]) {
+    for (nlohmann::ordered_json registry : target_configuration_blob["registries"]) {
         std::string repository_url = registry["repository"];
         auto normalized_url = normalize_git_repository_url(repository_url);
         normalized_url_to_registry_url[normalized_url] = repository_url;
         normalized_registry_url_to_baseline[normalized_url] = registry["baseline"];
-        json packages = registry["packages"];
+        nlohmann::ordered_json packages = registry["packages"];
         std::copy(
             packages.begin(), packages.end(),
             std::inserter(
@@ -33,14 +33,14 @@ json MergeConfigurations(json user_configuration_blob, json target_configuration
         );
     }
 
-    for (json registry : user_configuration_blob["registries"]) {
+    for (nlohmann::ordered_json registry : user_configuration_blob["registries"]) {
         std::string repository_url = registry["repository"];
         auto normalized_url = normalize_git_repository_url(repository_url);
         if (!normalized_url_to_registry_url.contains(normalized_url)) {
             normalized_url_to_registry_url[normalized_url] = repository_url;
             normalized_registry_url_to_baseline[normalized_url] = registry["baseline"];
         }
-        json packages = registry["packages"];
+        nlohmann::ordered_json packages = registry["packages"];
         std::copy(
             packages.begin(), packages.end(),
             std::inserter(
@@ -50,14 +50,14 @@ json MergeConfigurations(json user_configuration_blob, json target_configuration
         );
     }
 
-    json new_registries_list = json::array();
+    nlohmann::ordered_json new_registries_list = nlohmann::ordered_json::array();
     for (auto pair : normalized_registry_url_to_packages_set) {
-        json thisRegitry = json::object();
+        nlohmann::ordered_json thisRegitry = nlohmann::ordered_json::object();
         thisRegitry["kind"] = "git";
         thisRegitry["baseline"] = normalized_registry_url_to_baseline[pair.first];
         thisRegitry["repository"] = normalized_url_to_registry_url[pair.first];
 
-        json packages = json::array();
+        nlohmann::ordered_json packages = nlohmann::ordered_json::array();
         for (auto package : pair.second) {
             packages.push_back(package);
         }
@@ -65,13 +65,13 @@ json MergeConfigurations(json user_configuration_blob, json target_configuration
         new_registries_list.push_back(thisRegitry);
     }
 
-    json output_configuration_blob = target_configuration_blob;
+    nlohmann::ordered_json output_configuration_blob = target_configuration_blob;
     output_configuration_blob["registries"] = new_registries_list;
 
     return output_configuration_blob;
 }
 
-json MergeManifests(json user_manifest_blob, json target_manifest_blob, std::vector<Dependency> exiting_overrides/*={}*/) {
+nlohmann::ordered_json MergeManifests(nlohmann::ordered_json user_manifest_blob, nlohmann::ordered_json target_manifest_blob, std::vector<Dependency> exiting_overrides/*={}*/) {
     std::set<std::string> user_project_overrides;
     std::set<std::string> matcher_project_overrides;
     std::vector<Dependency> user_project_override_dependencies;
@@ -112,7 +112,7 @@ json MergeManifests(json user_manifest_blob, json target_manifest_blob, std::vec
     // );
     //
     // // if the user and the build tree to match share override dependencies, use the version in the matching build tree
-    // json output_overrides_json_list = json::array();
+    // nlohmann::ordered_json output_overrides_json_list = nlohmann::ordered_json::array();
     // for (auto dep : user_project_override_dependencies) {
     //     std::cout << "Target override preferred over user's for: " << dep.name << std::endl;
     //     if (!shared_overrides.contains(dep.name)) {
@@ -131,10 +131,10 @@ json MergeManifests(json user_manifest_blob, json target_manifest_blob, std::vec
     // }
     //
 
-    json output_manifest = user_manifest_blob;
+    nlohmann::ordered_json output_manifest = user_manifest_blob;
 
     if (!exiting_overrides.empty()) {
-        auto overrides = json::array();
+        auto overrides = nlohmann::ordered_json::array();
         for (auto override : exiting_overrides) {
             overrides.push_back({
                 {"name", override.name},

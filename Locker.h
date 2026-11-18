@@ -11,7 +11,6 @@
 #include <filesystem>
 #include <nlohmann/json.hpp>
 
-using nlohmann::json;
 
 class Locker {
 public:
@@ -23,7 +22,7 @@ public:
     int Lock(const std::string& lockfile_out_path);
 private:
 
-    json get_directory_as_json_blob(std::filesystem::path& path);
+    nlohmann::ordered_json get_directory_as_json_blob(std::filesystem::path& path);
 
     std::string cmake_build_directory_path_string;
     std::vector<std::string> copy_directories;

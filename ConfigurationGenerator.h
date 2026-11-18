@@ -8,7 +8,6 @@
 #include <string>
 #include <filesystem>
 #include <nlohmann/json.hpp>
-using nlohmann::json;
 
 class ConfigurationGenerator {
 public:
@@ -17,16 +16,16 @@ public:
     void SetParentPresetName(const std::string &);
 
 private:
-    json lockfileData;
-    json extra_directories_blob;
-    json configuration_blob;
-    json manifest_blob;
-    json env_vars_blob;
+    nlohmann::ordered_json lockfileData;
+    nlohmann::ordered_json extra_directories_blob;
+    nlohmann::ordered_json configuration_blob;
+    nlohmann::ordered_json manifest_blob;
+    nlohmann::ordered_json env_vars_blob;
     std::string overlayTripletsPath;
     std::string targetTripletName;
     std::string inheritsPreset;
 
-    void generate_directory_structure_from_json_blob(json blob, const std::filesystem::path& destination);
+    void generate_directory_structure_from_json_blob(nlohmann::ordered_json blob, const std::filesystem::path& destination);
 };
 
 

@@ -31,7 +31,7 @@ void CMakePresetsWriter::Write(std::string output_path) {
             if (child.path().filename() == "CMakeUserPresets.json") {
                 std::ifstream existingUserPresetsFile(child.path());
 
-                auto existingPresets = json::parse(existingUserPresetsFile);
+                auto existingPresets = nlohmann::ordered_json::parse(existingUserPresetsFile);
 
                 if (existingPresets.contains("configurePresets")) {
                     auto existingConfigurationPresets = existingPresets["configurePresets"];
@@ -46,9 +46,9 @@ void CMakePresetsWriter::Write(std::string output_path) {
     ofile << cmakePresetFileObject.dump(2);
 }
 
-json::array_t CMakePresetsWriter::MergePresetsLists(json::array_t users, json::array_t ours) {
+nlohmann::ordered_json::array_t CMakePresetsWriter::MergePresetsLists(nlohmann::ordered_json::array_t users, nlohmann::ordered_json::array_t ours) {
     std::set<std::string> presetNames;
-    json::array_t presets;
+    nlohmann::ordered_json::array_t presets;
     for (auto preset : ours) {
         std::string name = preset["name"];
         presetNames.insert(name);
@@ -91,7 +91,7 @@ void CMakePreset::SetInherits(const std::string &parentName) {
 
 void CMakePreset::AddCacheVariable(const std::string &name, const std::string& value) {
     if (!data.contains("cacheVariables")) {
-        data["cacheVariables"] = json::object();
+        data["cacheVariables"] = nlohmann::ordered_json::object();
     }
 
     data["cacheVariables"][name] = value;
@@ -100,7 +100,7 @@ void CMakePreset::AddCacheVariable(const std::string &name, const std::string& v
 template<typename T>
 void CMakePreset::AddEnvironmentVariable(const std::string& name, T value) {
     if (!data.contains("environment")) {
-        data["environment"] = json::object();
+        data["environment"] = nlohmann::ordered_json::object();
     }
 
     data["environment"][name] = value;

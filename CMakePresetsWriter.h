@@ -7,16 +7,15 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
-using nlohmann::json;
 
-const static json CMakePresetBase = json::object({
+const static nlohmann::ordered_json CMakePresetBase = nlohmann::ordered_json::object({
     {"version", 3},
     {"cmakeMinimumRequired", {
         {"major", 3},
         {"minor", 31},
         {"patch", 0}
       }},
-      {"configurePresets", json::array()}
+      {"configurePresets", nlohmann::ordered_json::array()}
 });
 
 class CMakePreset {
@@ -29,7 +28,7 @@ public:
     void AddCacheVariable(const std::string &name, const std::string& value);
     template<typename T>
     void AddEnvironmentVariable(const std::string& name, T value);
-    json data;
+    nlohmann::ordered_json data;
 };
 
 class CMakePresetsWriter {
@@ -37,9 +36,9 @@ public:
     CMakePresetsWriter(int ver=3, int maj=3, int min=31, int pat=0);
     void AddPreset(CMakePreset preset);
     void Write(std::string output_path);
-    json::array_t MergePresetsLists(json::array_t users, json::array_t ours);
+    nlohmann::ordered_json::array_t MergePresetsLists(nlohmann::ordered_json::array_t users, nlohmann::ordered_json::array_t ours);
 private:
-    json cmakePresetFileObject = CMakePresetBase;
+    nlohmann::ordered_json cmakePresetFileObject = CMakePresetBase;
 };
 
 

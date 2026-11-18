@@ -12,7 +12,7 @@
 
 ConfigurationGenerator::ConfigurationGenerator(const std::string& lockfile_path) {
     std::ifstream lockfile(lockfile_path);
-    json lockfileData = json::parse(lockfile);
+    nlohmann::ordered_json lockfileData = nlohmann::ordered_json::parse(lockfile);
 
     extra_directories_blob = lockfileData["extra_directories"];
     configuration_blob =  lockfileData["configuration"];
@@ -38,13 +38,13 @@ void ConfigurationGenerator::Generate(const std::string& user_project_root) {
     std::filesystem::path user_project_vcpkg_manifest_path(user_project_root);
     user_project_vcpkg_manifest_path.append("vcpkg.json");
     std::ifstream user_project_vcpkg_manifest_file(user_project_vcpkg_manifest_path);
-    json user_vcpkg_manifest_blob = json::parse(user_project_vcpkg_manifest_file);
+    nlohmann::ordered_json user_vcpkg_manifest_blob = nlohmann::ordered_json::parse(user_project_vcpkg_manifest_file);
 
     // read user's vcpkg-configuration.json file
     std::filesystem::path user_project_vcpkg_configuration_path(user_project_root);
     user_project_vcpkg_configuration_path.append("vcpkg-configuration.json");
     std::ifstream user_project_vcpkg_configuration_file(user_project_vcpkg_configuration_path);
-    json user_vcpkg_configuration_blob = json::parse(user_project_vcpkg_configuration_file);
+    nlohmann::ordered_json user_vcpkg_configuration_blob = nlohmann::ordered_json::parse(user_project_vcpkg_configuration_file);
 
     manifest_blob = MergeManifests(user_vcpkg_manifest_blob, manifest_blob);
     configuration_blob = MergeConfigurations(user_vcpkg_configuration_blob, configuration_blob);
@@ -89,7 +89,7 @@ void ConfigurationGenerator::SetParentPresetName(const std::string &name) {
     inheritsPreset = name;
 }
 
-void ConfigurationGenerator::generate_directory_structure_from_json_blob(json blob, const std::filesystem::path& destination) {
+void ConfigurationGenerator::generate_directory_structure_from_json_blob(nlohmann::ordered_json blob, const std::filesystem::path& destination) {
     for (auto f : blob.items()) {
         if (f.value().is_object()) {
             auto childPath = destination;

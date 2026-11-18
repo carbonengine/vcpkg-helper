@@ -52,7 +52,7 @@ int Locker::Lock(const std::string &lockfile_out_path) {
         }
 
         // recursively encode the directory structure & all the contained files into a json object
-        json encoded_directories_blob = json::object();
+        nlohmann::ordered_json encoded_directories_blob = nlohmann::ordered_json::object();
         if (copy_directories.size() > 1) {
             // calculate the closest common root directory for all directories we are copying
             // (we need to assume that files in these directories depend on one-another using relative paths
@@ -84,13 +84,13 @@ int Locker::Lock(const std::string &lockfile_out_path) {
             for (std::filesystem::path copyPath : copy_directories) {
                 if (std::filesystem::is_directory(copyPath)) {
                     auto proximalPath  = std::filesystem::proximate(copyPath, closestCommonRoot);
-                    json* node = &encoded_directories_blob;
+                    nlohmann::ordered_json* node = &encoded_directories_blob;
                     for (auto el : proximalPath) {
                         if (el == proximalPath.filename()) {
                             (*node)[el.string()] = get_directory_as_json_blob(copyPath);
                         }
                         else if (!node->contains(el.string())) {
-                            (*node)[el.string()] = json::object();
+                            (*node)[el.string()] = nlohmann::ordered_json::object();
                             node = &node->at(el.string());
                         }
                         else {
@@ -130,7 +130,7 @@ int Locker::Lock(const std::string &lockfile_out_path) {
 
             if (std::filesystem::exists(childPath)) {
                 std::ifstream f(childPath);
-                json data = json::parse(f);
+                nlohmann::ordered_json data = nlohmann::ordered_json::parse(f);
 
                 std::string name = data["packages"][0]["name"];
                 std::string version = data["packages"][0]["versionInfo"];
@@ -160,7 +160,7 @@ int Locker::Lock(const std::string &lockfile_out_path) {
         vcpkg_config_path.append("vcpkg-configuration.json");
 
         std::ifstream vcpkg_configuration_file(vcpkg_config_path);
-        json vcpkg_configuration_data = json::parse(vcpkg_configuration_file);
+        nlohmann::ordered_json vcpkg_configuration_data = nlohmann::ordered_json::parse(vcpkg_configuration_file);
 
         std::map<std::string, std::string> package_name_to_registry_baseline;
 
@@ -183,11 +183,11 @@ int Locker::Lock(const std::string &lockfile_out_path) {
             env_vars_map[env_vars[i]] = env_vars[i+1];
         }
 
-        json lockObject = {
+        nlohmann::ordered_json lockObject = {
             {"environment", env_vars_map},
             {"manifest", {
-                        {"dependencies", json::array()},
-                        {"overrides", json::array()}
+                        {"dependencies", nlohmann::ordered_json::array()},
+                        {"overrides", nlohmann::ordered_json::array()}
             }},
         {"configuration", {
             {"default-registry", {
@@ -195,7 +195,7 @@ int Locker::Lock(const std::string &lockfile_out_path) {
                 {"baseline", default_registry_baseline},
                 {"repository", default_registry_repository}
             }},
-            {"registries", json::array()}
+            {"registries", nlohmann::ordered_json::array()}
             }},
             {"extra_directories", encoded_directories_blob},
             {"target_triplet", triplet_name}
@@ -220,11 +220,11 @@ int Locker::Lock(const std::string &lockfile_out_path) {
                 continue;
             }
 
-            json registry_block = {
+            nlohmann::ordered_json registry_block = {
             {"kind", "git"},
             {"repository", registry},
             {"baseline", packages_baseline},
-            {"packages", json::array()}
+            {"packages", nlohmann::ordered_json::array()}
             };
             registry_block["packages"] = package_names;
             lockObject["configuration"]["registries"].push_back(registry_block);
@@ -232,7 +232,7 @@ int Locker::Lock(const std::string &lockfile_out_path) {
 
         for (auto d : dependencies) {
             std::cout << d.name << " " << d.version << std::endl;
-            json override = {
+            nlohmann::ordered_json override = {
                 {"name", d.name},
                 {"version", d.version}
             };
@@ -246,12 +246,12 @@ int Locker::Lock(const std::string &lockfile_out_path) {
 }
 
 
-json Locker::get_directory_as_json_blob(std::filesystem::path& path) {
+nlohmann::ordered_json Locker::get_directory_as_json_blob(std::filesystem::path& path) {
     if (!std::filesystem::is_directory(path)) {
-        return json::object();
+        return nlohmann::ordered_json::object();
     }
 
-    json blob = json::object();
+    nlohmann::ordered_json blob = nlohmann::ordered_json::object();
 
     for (auto child : std::filesystem::directory_iterator(path)) {
         auto childPath = child.path();

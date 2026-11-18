@@ -11,7 +11,6 @@
 #include "MinimalConfigurationGenerator.h"
 #include "VcpkgConfigurationMerger.h"
 
-using nlohmann::json;
 
 void MinimalConfigurationGenerator::AddSPDXRoot(const std::filesystem::path& spdx_files_root) {
     if (!std::filesystem::is_directory(spdx_files_root)) {
@@ -26,7 +25,7 @@ void MinimalConfigurationGenerator::AddSPDXRoot(const std::filesystem::path& spd
         if (std::filesystem::exists(childPath)) {
             std::cout << "parsing spdx file: " << childPath << std::endl;
             std::ifstream f(childPath);
-            json data = json::parse(f);
+            nlohmann::ordered_json data = nlohmann::ordered_json::parse(f);
 
             std::string name = data["packages"][0]["name"];
             std::string version = data["packages"][0]["versionInfo"];
@@ -53,7 +52,7 @@ void MinimalConfigurationGenerator::AddSPDXRoot(const std::filesystem::path& spd
 }
 
 void MinimalConfigurationGenerator::GenerateConfigurationForLocalProject(std::filesystem::path& path_to_project_to_configure, const ProjectLocator &project_locator) {
-    json generated_manifest_object = json::object();
+    nlohmann::ordered_json generated_manifest_object = nlohmann::ordered_json::object();
 
     if (!std::filesystem::is_directory(path_to_project_to_configure)) {
         std::cerr << "no such directory: " << path_to_project_to_configure << std::endl;
@@ -84,8 +83,8 @@ void MinimalConfigurationGenerator::GenerateConfigurationForLocalProject(std::fi
     std::ifstream target_manifest_file(path_to_vcpkg_manifest_file);
     std::ifstream target_configuration_file(path_to_vcpkg_configuration_file);
 
-    json target_manifest_blob = json::parse(target_manifest_file);
-    json target_configuration_blob = json::parse(target_configuration_file);
+    nlohmann::ordered_json target_manifest_blob = nlohmann::ordered_json::parse(target_manifest_file);
+    nlohmann::ordered_json target_configuration_blob = nlohmann::ordered_json::parse(target_configuration_file);
     target_manifest_file.close();
     target_configuration_file.close();
     resolver.Clean();
@@ -105,11 +104,11 @@ void MinimalConfigurationGenerator::GenerateConfigurationForLocalProject(std::fi
         exit(1);
     }
 
-    json user_manifest_blob = json::parse(std::ifstream(path_to_user_vcpkg_manifest));
-    json user_configuration_blob = json::parse(std::ifstream(path_to_user_vcpkg_configuration));
+    nlohmann::ordered_json user_manifest_blob = nlohmann::ordered_json::parse(std::ifstream(path_to_user_vcpkg_manifest));
+    nlohmann::ordered_json user_configuration_blob = nlohmann::ordered_json::parse(std::ifstream(path_to_user_vcpkg_configuration));
 
-    json output_manifest = MergeManifests(user_manifest_blob, target_manifest_blob, m_dependencies);
-    json output_configuration = MergeConfigurations(user_configuration_blob, target_configuration_blob);
+    nlohmann::ordered_json output_manifest = MergeManifests(user_manifest_blob, target_manifest_blob, m_dependencies);
+    nlohmann::ordered_json output_configuration = MergeConfigurations(user_configuration_blob, target_configuration_blob);
 
     std::ofstream output_manifest_file (path_to_user_vcpkg_manifest);
     output_manifest_file << output_manifest.dump(2);
