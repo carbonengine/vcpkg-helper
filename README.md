@@ -1,3 +1,20 @@
+# TLDR; How & When to use this tool
+Often times, game-team developers will be working on custom versions of carbon components EG
+
+trinity, audio, destity etc . . . 
+
+Often, a new version of carbon engine will be released and be copied up to the perforce stream/branch you’re working in. You will need to change the vcpkg configuration in your customized component, and re-build to get it working in the branch again. This may be because for instance, versions of various dependencies have now changed.
+
+This tool makes that upgrade process a lot easier:
+1. Identify what version of the carbon engine has been released to your branch (`vendor/github.com/ccpgames/carbon-port/[VERSION]`)
+2. `buildtool target path/to/my/customized/component/project -g git@github.com:ccpgames/carbon-port.git refs/tags/[VERSION]`
+3. The necessary changes to the vcpkg configuration (`vcpkg.json` & `vcpkg-configuration.json`) will now be sitting unstaged in your customized component project.
+4. Rebuild and test; code changes may still be required.
+
+Note: 
+- These steps are for Fenris game teams; others can point -g at any project.
+- To stay ahead any breaking changes that may be released with a new carbon engine version, please pay close attention to deprecation warnings in your builds, and try to remove any usages of deprecated code.
+
 # BuildTool
 
 BuildTool helps you match your vcpkg configuration with a different vcpkg build tree outside of your project which you don't want to / can't depend on through vcpkg. This may be because  the target build-tree is very large and you don't require all of it to build your project, or because it has already been built and you can't / don't want to replace those binaries.
@@ -50,7 +67,7 @@ The simplest way to use buildtool is to have it merge your vcpkg.json & vcpkg-co
 
 This will change the vcpkg.json and vcpkg-configuration.json files in  `/path/to/my/project/root` to ensure that 
 1. You are using the same baselines for all your configured registries in your vcpkg-configuration.json file as  `other_project.git` does
-2. You are using all the same version overrides in your vcpkg.json file as `other_project.git` does 
+2. You are using all the same version overrides in your vcpkg.json file as `other_project.git` does
 
 This is not however completely foolproof. As your projects dependencies may cause the versions of shared dependencies to be raised compared to `other_project.git` 
 This also does not guarentee that you will use the same vcpkg triplet & toolchain configuration as the target project.
