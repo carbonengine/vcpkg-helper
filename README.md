@@ -1,3 +1,15 @@
+# TLDR; How & When to use this tool
+Often times, game-team developers will be working on custom versions of carbon components EG
+
+trinity, audio, desity etc . . . 
+
+Often, a new version of carbon engine will be released and be copied up to the perforce stream/branch you’re working in. You will need to change the vcpkg configuration in your customized component, and re-build to get it working in the branch again. This may be because for instance, versions of various dependencies have now changed.
+
+This tool makes that upgrade process a lot easier:
+1. Identify what version of the carbon engine has been released to your branch (`vendor/github.com/ccpgames/carbon-port/[VERSION]`)
+2. `buildtool target path/to/my/customized/component/project -g git@github.com:ccpgames/carbon-port.git refs/tags/[VERSION]`
+3. The necessary changes to the vcpkg configuration (`vcpkg.json` & `vcpkg-configuration.json`) now be sitting unstaged in your customized component project.
+
 # BuildTool
 
 BuildTool helps you match your vcpkg configuration with a different vcpkg build tree outside of your project which you don't want to / can't depend on through vcpkg. This may be because  the target build-tree is very large and you don't require all of it to build your project, or because it has already been built and you can't / don't want to replace those binaries.
