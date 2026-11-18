@@ -8,7 +8,7 @@ Often, a new version of carbon engine will be released and be copied up to the p
 This tool makes that upgrade process a lot easier:
 1. Identify what version of the carbon engine has been released to your branch (`vendor/github.com/ccpgames/carbon-port/[VERSION]`)
 2. `buildtool target path/to/my/customized/component/project -g git@github.com:ccpgames/carbon-port.git refs/tags/[VERSION]`
-3. The necessary changes to the vcpkg configuration (`vcpkg.json` & `vcpkg-configuration.json`) now be sitting unstaged in your customized component project.
+3. The necessary changes to the vcpkg configuration (`vcpkg.json` & `vcpkg-configuration.json`) will now be sitting unstaged in your customized component project.
 
 # BuildTool
 
